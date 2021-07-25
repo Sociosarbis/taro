@@ -12,6 +12,7 @@ import * as MiniCssExtractPlugin from 'mini-css-extract-plugin'
 import { join, resolve } from 'path'
 import * as TerserPlugin from 'terser-webpack-plugin'
 import * as webpack from 'webpack'
+import { FRAMEWORK_MAP } from '@tarojs/helper'
 import { PostcssOption, IPostcssOption, ICopyOptions } from '@tarojs/taro/types/compile'
 import * as ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin'
 
@@ -258,6 +259,7 @@ const getEsnextModuleRules = esnextModules => {
 }
 
 export const getModule = (appPath: string, {
+  framework,
   staticDirectory,
   designWidth,
   deviceRatio,
@@ -367,6 +369,7 @@ export const getModule = (appPath: string, {
   const cssLoader = getCssLoader(cssOptions)
   const cssLoaders: {
     include?
+    resourceQuery?
     use
   }[] = [
     {
@@ -390,6 +393,13 @@ export const getModule = (appPath: string, {
       include: [cssModuleCondition],
       use: [cssLoaderWithModule]
     })
+
+    if ([FRAMEWORK_MAP.VUE, FRAMEWORK_MAP.VUE3].includes(framework)) {
+      cssLoaders.unshift({
+        resourceQuery: /module/,
+        use: [cssLoaderWithModule]
+      })
+    }
   }
 
   const postcssLoader = getPostcssLoader([

@@ -234,7 +234,7 @@ export default (appPath: string, mode, config: Partial<IBuildConfig>): any => {
     resolve: { alias },
     module: getModule(appPath, {
       sourceDir,
-
+      framework,
       buildAdapter,
       isBuildQuickapp,
       // constantsReplaceList,

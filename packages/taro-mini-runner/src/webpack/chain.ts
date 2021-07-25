@@ -8,6 +8,7 @@ import { partial, cloneDeep } from 'lodash'
 import { mapKeys, pipe } from 'lodash/fp'
 import * as TerserPlugin from 'terser-webpack-plugin'
 import * as webpack from 'webpack'
+import { FRAMEWORK_MAP } from '@tarojs/helper'
 import { PostcssOption, ICopyOptions, IPostcssOption } from '@tarojs/taro/types/compile'
 import {
   recursiveMerge,
@@ -196,7 +197,7 @@ export const getProviderPlugin = args => {
 
 export const getModule = (appPath: string, {
   sourceDir,
-
+  framework,
   designWidth,
   deviceRatio,
   buildAdapter,
@@ -230,20 +231,15 @@ export const getModule = (appPath: string, {
     cssLoaderOption
   ]
   const cssOptionsWithModule = [
-    Object.assign(
-      {
-        importLoaders: 1,
-        sourceMap: enableSourceMap,
-        modules: {
-          mode: namingPattern === 'module' ? 'local' : 'global'
-        }
-      },
-      {
-        modules: typeof generateScopedName === 'function'
-          ? { getLocalIdent: (context, _, localName) => generateScopedName(localName, context.resourcePath) }
-          : { localIdentName: generateScopedName }
-      }
-    ),
+    {
+      importLoaders: 1,
+      sourceMap: enableSourceMap,
+      modules: Object.assign({
+        mode: namingPattern === 'module' ? 'local' : 'global'
+      }, typeof generateScopedName === 'function'
+      ? { getLocalIdent: (context, _, localName) => generateScopedName(localName, context.resourcePath) }
+      : { localIdentName: generateScopedName })
+    },
     cssLoaderOption
   ]
   const extractCssLoader = getExtractCssLoader()
@@ -316,6 +312,7 @@ export const getModule = (appPath: string, {
 
   const cssLoaders: {
     include?;
+    resourceQuery?;
     use;
   }[] = [{
     use: [
@@ -348,6 +345,17 @@ export const getModule = (appPath: string, {
         postcssLoader
       ]
     })
+
+    if ([FRAMEWORK_MAP.VUE, FRAMEWORK_MAP.VUE3].includes(framework)) {
+      cssLoaders.unshift({
+        resourceQuery: /module/,
+        use: [
+          extractCssLoader,
+          cssLoaderWithModule,
+          postcssLoader
+        ]
+      })
+    }
   }
 
   const urlOptions: PostcssOption.url = recursiveMerge({}, defaultUrlOption, postcssOption.url)

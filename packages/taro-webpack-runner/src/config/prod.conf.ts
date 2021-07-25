@@ -34,7 +34,7 @@ export default function (appPath: string, config: Partial<BuildConfig>): any {
     staticDirectory = 'static',
     chunkDirectory = 'chunk',
     router = emptyObj,
-
+    framework,
     designWidth = 750,
     deviceRatio,
     enableSourceMap = false,
@@ -148,6 +148,7 @@ export default function (appPath: string, config: Partial<BuildConfig>): any {
     }, output]),
     resolve: { alias },
     module: getModule(appPath, {
+      framework,
       designWidth,
       deviceRatio,
       enableExtract,
